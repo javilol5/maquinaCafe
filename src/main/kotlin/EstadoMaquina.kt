@@ -1,11 +1,10 @@
 package javier.casal
 
 sealed class CoffeeMachineState {
-    object Idle : CoffeeMachineState()
-    data class SeleccionandoCafe( val nomreCafe : String ) : CoffeeMachineState()
-    object Pagando : CoffeeMachineState()
-    object RestoPago : CoffeeMachineState()
-    object HaciendoCafe : CoffeeMachineState()
-    data class SirviendoCafe(val brand: String):CoffeeMachineState()
-    data class Error(val message: String) : CoffeeMachineState()
+    object Inactivo : CoffeeMachineState()
+    object EsperandoDinero : CoffeeMachineState()
+    data class Seleccionando(val producto: String) : CoffeeMachineState()
+    data class Preparando(val producto: String) : CoffeeMachineState()
+    data class ServirBebida(val producto: String, val cambio: Double) : CoffeeMachineState()
+    data class FueraServicio(val motivo: String) : CoffeeMachineState()
 }
