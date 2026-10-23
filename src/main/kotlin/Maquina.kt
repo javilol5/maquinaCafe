@@ -28,16 +28,33 @@ object CoffeeMachine {
     }
 
     // Seleccionando -> Preparando (o vuelta a EsperandoDinero al cancelar)
-    fun seleccionarProducto(producto: String, precio: Double) {
+    fun seleccionarProducto(nombreBebida: String) {
         when (estadoActual) {
             is CoffeeMachineState.Seleccionando -> {
-                if (saldo >= precio) {
-                    println("Producto seleccionado: $producto (Precio: $precio€)")
-                    saldo -= precio
-                    estadoActual = CoffeeMachineState.Preparando(producto)
+                val cafeEncontrado = Cafes.buscarCafes(nombreBebida)
+
+                if (cafeEncontrado == null) {
+                    println("Error: El café '$nombreBebida' no existe en el catálogo.")
+                    return
+                }
+
+                // 2. Verificamos si hay stock
+                if (cafeEncontrado.stock <= 0) {
+                    println("Lo sentimos, no hay stock disponible para '${cafeEncontrado.nombre}'.")
+                    return
+                }
+
+                // 3. Verificamos si se metió dinero suficiente
+                if (saldo >= cafeEncontrado.precio) {
+                    println("Producto seleccionado: ${cafeEncontrado.nombre} (Precio: ${cafeEncontrado.precio}€)")
+
+                    // Descontar stock y restar precio del saldo
+                    cafeEncontrado.stock -= 1
+                    saldo -= cafeEncontrado.precio
+
+                    estadoActual = CoffeeMachineState.Preparando(cafeEncontrado.nombre)
                 } else {
-                    println("Saldo insuficiente ($saldo€) para $producto ($precio€). Volviendo a EsperandoDinero...")
-                    estadoActual = CoffeeMachineState.EsperandoDinero
+                    println("Saldo insuficiente ($saldo€) para ${cafeEncontrado.nombre} (${cafeEncontrado.precio}€). Faltan ${cafeEncontrado.precio - saldo}€.")
                 }
             }
             else -> println("Debe insertar dinero antes de seleccionar un producto.")
@@ -59,7 +76,6 @@ object CoffeeMachine {
             println("Validando agua, azúcar, vasos y granos para: ${estado.producto}...")
             if (hayIngredientes) {
                 println("Preparando la bebida...")
-                Thread.sleep(1000)
                 val cambio = saldo
                 saldo = 0.0
                 estadoActual = CoffeeMachineState.ServirBebida(estado.producto, cambio)
@@ -84,7 +100,7 @@ object CoffeeMachine {
         if (estadoActual is CoffeeMachineState.FueraServicio) {
             println("Reparando y reponiendo máquina...")
             estadoActual = CoffeeMachineState.EsperandoDinero
-            println("Sistema recuperado. Estado actual: $estadoActual")
+            println("Sistema recuperado. Estado actual: "+"${estadoActual.toString()}")
         }
     }
 
